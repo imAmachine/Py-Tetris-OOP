@@ -1,6 +1,6 @@
 import copy
 import time
-from engine.game_objects import Tetromino
+from engine.game_objects import Tetromino, Text
 from game_packet.GameLayer import GameLayer
 
 
@@ -27,13 +27,20 @@ class TetrisGame:
         self.fg_moving_left = False
         self.fg_moving_right = False
 
+        # Инициализация текстов
+        self.pause_label = Text("Paused", self.field.field_size_px[0] / 2,
+                                self.field.field_size_px[1] / 2,
+                                350, 350, (255, 0, 0), None)
+
         # Игровые переменные
         self.running = False
         self.paused = True
+        self.lines = 0
 
     def start_game(self):
         self.running = True
         self.drawing_engine.add_object(self.field)
+        self.drawing_engine.add_object(self.pause_label)
         self.switch_figures()
         self.game_layer.game_loop()
 
@@ -90,23 +97,29 @@ class TetrisGame:
         return lines_count
 
     def update_state(self):
-        if not self.paused:
-            # таймер на вертикальное движение фигуры
-            if time.time() - self.last_drop_time >= self.drop_interval:
-                if not self.check_collision(self.current_fg, (0, 1)):
-                    self.last_drop_time = time.time()
-                    self.move_fg(0, 1)
-                else:
-                    self.last_drop_time = time.time()
-                    self.current_fg.fix() # зафиксировать фигуру на поле
-                    lines_count = self.check_lines() # проверить и убрать полные линии
-                    self.switch_figures() # активировать следующую фигуру
+        self.pause_label.hidden = not self.paused
+        if self.paused:
+            return
 
-            # таймер на горизонтальное движение фигуры
-            if time.time() - self.last_move_time >= self.move_interval:
-                if self.fg_moving_left:
-                    self.move_fg(-1, 0)
-                    self.last_move_time = time.time()
-                elif self.fg_moving_right:
-                    self.move_fg(1, 0)
-                    self.last_move_time = time.time()
+        if time.time() - self.last_drop_time >= self.drop_interval:
+            self.update_drop()
+        if time.time() - self.last_move_time >= self.move_interval:
+            self.update_move()
+
+    def update_drop(self):
+        if not self.check_collision(self.current_fg, (0, 1)):
+            self.last_drop_time = time.time()
+            self.move_fg(0, 1)
+        else:
+            self.last_drop_time = time.time()
+            self.current_fg.fix() # зафиксировать фигуру на поле
+            self.lines += self.check_lines() # проверить и убрать полные линии
+            self.switch_figures() # активировать следующую фигуру
+
+    def update_move(self):
+        if self.fg_moving_left:
+            self.move_fg(-1, 0)
+            self.last_move_time = time.time()
+        elif self.fg_moving_right:
+            self.move_fg(1, 0)
+            self.last_move_time = time.time()

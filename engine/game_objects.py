@@ -45,6 +45,19 @@ class GameField(list, IDrawable):
             for block in line:
                 block.draw(surface, layer)
 
+class Text(IDrawable):
+    def __init__(self, text, x, y, width, height, color, font_name, hidden=False) -> None:
+        self.text = text
+        self.pos = (x, y)
+        self.size = (width, height)
+        self.color = color
+        self.font_name = font_name
+        self.hidden = hidden
+
+    def draw(self, surface, drawing_layer):
+        if not self.hidden:
+            drawing_layer.draw_text(surface, self.text, self.pos[0], self.pos[1],
+                            self.size[0], self.size[1], self.color, self.font_name)
 
 class Block(IDrawable):
     def __init__(self, x=0.0, y=0.0, size=5.0, border=True) -> None:
@@ -122,14 +135,3 @@ class Tetromino(IDrawable):
             for block in self.blocks:
                 layer.draw_block(surface, self.color, block.x + 1, block.y + 1,
                                  block.size - 2, block.size - 2)
-
-
-
-class Text(IDrawable):
-    def __init__(self, text, font, color=(255, 255, 255)):
-        self.text = text
-        self.font = font
-        self.color = color
-
-    def draw(self, surface, gp_draw):
-        gp_draw.draw_text(surface, self.text, self.font, self.color)

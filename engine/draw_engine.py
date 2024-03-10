@@ -22,3 +22,4 @@ class DrawEngine:
             if obj:
                 obj.draw(self.screen, self.drawing_layer)
         self.drawing_layer.display_update()
+        print(f"drawed elements: {len(self.objects_to_draw)}")

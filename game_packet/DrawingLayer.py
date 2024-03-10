@@ -9,9 +9,23 @@ class DrawingLayer(IDraw):
         if border > 0:
             pygame.draw.rect(surface, (155, 155, 155), rect, border)
 
-    def draw_text(self, surface, text, font, color):
+    def draw_text(self, surface, text, x, y, width, height, color, font_name):
+        font_size = 100  # начальный размер шрифта
+        font = pygame.font.Font(font_name, font_size)
         text_surface = font.render(text, True, color)
-        surface.blit(text_surface, (0, 0))
+        text_width, text_height = text_surface.get_size()
+
+        # уменьшаем размер шрифта, пока текст не влезет в заданный блок
+        while text_width > width or text_height > height:
+            font_size -= 1
+            font = pygame.font.Font(font_name, font_size)
+            text_surface = font.render(text, True, color)
+            text_width, text_height = text_surface.get_size()
+
+        # рисуем текст по центру заданного блока
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        pygame.draw.rect(surface, (0, 255, 0), text_rect)
+        surface.blit(text_surface, text_rect)
 
     def fill_screen(self, screen, color):
          screen.fill(color)

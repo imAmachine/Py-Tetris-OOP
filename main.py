@@ -4,7 +4,7 @@ from game_packet.DrawingLayer import DrawingLayer
 from engine.game_objects import GameField
 
 # параметры игровой логики
-field_size_blcks = (10, 15) # размер поля в блоках
+field_size_blcks = (10, 20) # размер поля в блоках
 default_blocks_color = (255, 255, 255) # цвет заливки блока игрового поля по умолчанию
 default_window_color = (155,155,155) # цвет заливки окна игры по умолчанию
 
