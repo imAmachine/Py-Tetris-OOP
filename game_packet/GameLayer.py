@@ -11,20 +11,20 @@ class GameLayer(IGame):
                 return False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    self.game.fg_move_left = True
+                    self.game.fg_moving_left = True
                 elif event.key == pygame.K_RIGHT:
-                    self.game.fg_move_right = True
-                elif event.key == pygame.K_z:
-                    self.game.rotate_fg(False)
-                elif event.key == pygame.K_x:
-                    self.game.rotate_fg(True)
-                elif event.key == pygame.K_SPACE:
+                    self.game.fg_moving_right = True
+                if event.key == pygame.K_SPACE:
                     self.game.drop_fg()
+                if event.key == pygame.K_z:
+                    self.game.rotate_fg()
+                if event.key == pygame.K_x:
+                    self.game.rotate_fg(True)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
-                    self.game.fg_move_left = False
+                    self.game.fg_moving_left = False
                 elif event.key == pygame.K_RIGHT:
-                    self.game.fg_move_right = False
+                    self.game.fg_moving_right = False
         return True
 
     def game_loop(self):

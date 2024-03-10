@@ -9,7 +9,7 @@ class TetrisGame:
     def __init__(self, drawing_engine, game_field):
         self.running = False
         self.last_drop_time = time.time()
-        self.drop_interval = 0.5  # Фигура будет падать каждую секунду
+        self.drop_interval = 0.5
         self.last_move_time = time.time()
         self.move_interval = 0.1
 
@@ -20,51 +20,27 @@ class TetrisGame:
         # Инициализация игрового поля
         self.field = game_field
         self.field.initialize_field()
+        self.field_center = self.field.width // 2
 
         # Инициализация игровой фигуры
-        self.current_fg = None
-        self.next_fg = self.create_random_fg()
-        self.fg_move_left = False
-        self.fg_move_right = False
-
-    def check_gameOver(self):
-        if self.check_collision(self.current_fg):
-            self.running = False
-            print("Game Over")
+        self.current_fg, self.next_fg = None, None
+        self.switch_figures()
+        self.fg_moving_left = False
+        self.fg_moving_right = False
 
     def start_game(self):
         self.running = True
         self.drawing_engine.add_object(self.field)
-        self.start_new_fg()
+        self.switch_figures()
         self.game_layer.game_loop()
 
-    def create_random_fg(self):
-        choice = random.choice(list(Tetromino.SHAPES.keys()))
-        fg = Tetromino(0, 0, choice)
-        return fg
-
-    def fieldBlocks_shift(self, to_idx):
-        for idx in range(len(self.field)):
-            self.field[idx - to_idx] = self.field[idx - 1 - to_idx]
-
-    def delete_full_rows(self):
-        for idx, row in enumerate(self.field[::-1]):
-            if all(block.isFixed for block in row):
-                self.fieldBlocks_shift(idx)
-
-    def start_new_fg(self):
-        if self.current_fg:
-            self.drawing_engine.remove_object(self.current_fg)
-        # Установка значений новой фигуры
+    def switch_figures(self):
+        self.drawing_engine.add_object(self.next_fg) # добавление на отрисовку активной фигуры
         self.current_fg = self.next_fg
-        self.current_fg.x = self.field.width // 2 - len(self.current_fg.shape[0]) // 2  # Установка начального положения фигуры
-        self.current_fg.y = 0
-        self.current_fg.blocks = self.fg_to_fieldBlocks(self.current_fg)
-
-        self.drawing_engine.add_object(self.current_fg)
-        self.next_fg = self.create_random_fg()
-        self.delete_full_rows()
-        self.check_gameOver()
+        if self.current_fg:
+            self.current_fg.blocks = self.fg_to_fieldBlocks(self.current_fg)
+        self.next_fg = Tetromino.get_random_tetromino()
+        self.next_fg.set_pos(self.field_center - len(self.next_fg.shape[0]) // 2, 0)
 
     def move_fg(self, dx, dy):
         if not self.check_collision(self.current_fg, (dx, dy)):
@@ -95,6 +71,7 @@ class TetrisGame:
         return 0 <= x < self.field.width and 0 <= y < self.field.height and not self.field[y][x].isFixed
 
     def fg_to_fieldBlocks(self, fg):
+        """метод для получения объектов активной фигуры с игрового поля"""
         blocks = []
         for y, row in enumerate(fg.shape):
             for x, cell in enumerate(row):
@@ -103,23 +80,30 @@ class TetrisGame:
                     blocks.append(block)
         return blocks
 
+    def delete_lines(self):
+        fg_y = self.current_fg.y
+        fg_height = len(self.current_fg.shape)
+        lines_found = self.field.check_lines(fg_y, fg_height)
+        print(lines_found)
+        
+    
     def update_state(self):
         # таймер на вертикальное движение фигуры
         if time.time() - self.last_drop_time >= self.drop_interval:
-            if self.current_fg is None:
-                self.start_new_fg()
+            if not self.check_collision(self.current_fg, (0, 1)):
+                self.move_fg(0, 1)
+                self.last_drop_time = time.time()
             else:
-                if not self.check_collision(self.current_fg, (0, 1)):
-                    self.move_fg(0, 1)
-                    self.last_drop_time = time.time()
-                else:
-                    self.current_fg.fix()
-                    self.start_new_fg()
+                self.current_fg.fix()
+                self.delete_lines()
+                self.switch_figures()
+                self.last_drop_time = time.time()
 
         # таймер на горизонтальное движение фигуры
         if time.time() - self.last_move_time >= self.move_interval:
-            if self.fg_move_left:
+            if self.fg_moving_left:
                 self.move_fg(-1, 0)
-            if self.fg_move_right:
+                self.last_move_time = time.time()
+            elif self.fg_moving_right:
                 self.move_fg(1, 0)
-            self.last_move_time = time.time()
+                self.last_move_time = time.time()
