@@ -20,11 +20,17 @@ class GameLayer(IGame):
                     self.game.rotate_fg()
                 if event.key == pygame.K_x:
                     self.game.rotate_fg(True)
+                if event.key == pygame.K_DOWN:
+                    self.game.drop_interval /= 5
+                if event.key == pygame.K_ESCAPE:
+                    self.game.paused = not self.game.paused
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     self.game.fg_moving_left = False
                 elif event.key == pygame.K_RIGHT:
                     self.game.fg_moving_right = False
+                if event.key == pygame.K_DOWN:
+                    self.game.drop_interval *= 5
         return True
 
     def game_loop(self):

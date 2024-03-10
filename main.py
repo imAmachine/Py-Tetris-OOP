@@ -15,7 +15,7 @@ field_size_px = (screen_size_px[0] * field_scaling_koef,
                  screen_size_px[1] * field_scaling_koef) # размер игрового поля относительно окна в пикселях
 game_title = "VLD`s TETROMINO"
 game_field = GameField(field_size_blcks, field_size_px,
-                       default_blocks_color, isGrid=True,
+                       default_blocks_color, isBordered=True,
                        padding=(15 , 15))
 drawing_engine = DrawEngine(screen_size_px, game_title, default_window_color, DrawingLayer()) # Инициализация движка отрисовки
 

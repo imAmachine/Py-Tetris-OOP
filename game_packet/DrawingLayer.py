@@ -4,8 +4,10 @@ from . import pygame, IDraw
 class DrawingLayer(IDraw):
     def draw_block(self, surface, color, x, y, width, height, border=0):
         rect = pygame.Rect(x, y, width, height)
-        current_color = color if color != None else (255, 255, 255)
-        pygame.draw.rect(surface, current_color, rect, border)
+        current_color = color if color else (255, 255, 255)
+        pygame.draw.rect(surface, current_color, rect)
+        if border > 0:
+            pygame.draw.rect(surface, (155, 155, 155), rect, border)
 
     def draw_text(self, surface, text, font, color):
         text_surface = font.render(text, True, color)
